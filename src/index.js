@@ -1,94 +1,167 @@
-/* ДЗ 1 - Функции */
+/* ДЗ 2 - работа с массивами и объектами */
 
 /*
  Задание 1:
- 1.1: Добавьте к функции параметр с любым именем
- 1.2: Функция должна возвращать аргумент, переданный ей в качестве параметра
- Пример:
-   returnFirstArgument(10) вернет 10
-   returnFirstArgument('привет') вернет `привет`
- Другими словами: функция должна возвращать в неизменном виде то, что поступает ей на вход
+
+ Напишите аналог встроенного метода forEach для работы с массивами
+ Посмотрите как работает forEach и повторите это поведение для массива, который будет передан в параметре array
  */
-function returnFirstArgument(a) {
-    return a;
+function forEach(array, fn, thisArg) {
+    if (array.constructor !== Array) {
+        throw new TypeError(array + ' is not an Array');
+    }
+
+    if (typeof fn !== 'function') {
+        throw new TypeError(fn + ' is not a function');
+    }
+
+    for (let i = 0; i < array.length; i++) {
+        if (typeof array[i] === 'undefined') {
+            continue;
+        }
+        fn.call(thisArg, array[i], i, array);
+    }
 }
 
 /*
  Задание 2:
- 2.1: Функция должна возвращать сумму переданных аргументов
- Пример:
-   sumWithDefaults(10, 20) вернет 30
-   sumWithDefaults(2, 4) вернет 6
- 2.1 *: Значение по умолчанию для второго аргумента должно быть равно 100
- Пример:
-   sumWithDefaults(10) вернет 110
- */
-function sumWithDefaults(a, b) {
-    b = b || 100;
 
-    return a + b;
+ Напишите аналог встроенного метода map для работы с массивами
+ Посмотрите как работает map и повторите это поведение для массива, который будет передан в параметре array
+ */
+function map(array, fn, thisArg) {
+    let result = [];
+
+    if (array.constructor !== Array) {
+        throw new TypeError(array + ' is not an Array');
+    }
+
+    if (typeof fn !== 'function') {
+        throw new TypeError(fn + ' is not a function');
+    }
+
+    for (let i = 0; i < array.length; i++) {
+        if (typeof array[i] === 'undefined') {
+            continue;
+        }
+        result[result.length] = fn.call(thisArg, array[i], i, array);
+    }
+
+    return result;
 }
 
 /*
  Задание 3:
- Функция должна принимать другую функцию и возвращать результат вызова этой функции
- Пример:
-   returnFnResult(() => 'привет') вернет 'привет'
+
+ Напишите аналог встроенного метода reduce для работы с массивами
+ Посмотрите как работает reduce и повторите это поведение для массива, который будет передан в параметре array
  */
-function returnFnResult(fn) {
-    return fn();
+function reduce(array, fn, initial) {
+    let result = initial || array[0];
+    let index = 0;
+
+    if (!initial) {
+        index = 1;
+    }
+
+    if (array.constructor !== Array) {
+        throw new TypeError(array + ' is not an Array');
+    }
+
+    if (typeof fn !== 'function') {
+        throw new TypeError(fn + ' is not a function');
+    }
+
+    for (let i = index; i < array.length; i++) {
+        if (typeof array[i] === 'undefined') {
+            continue;
+        }
+        result = fn(result, array[i], i, array);
+    }
+
+    return result;
 }
 
 /*
  Задание 4:
- Функция должна принимать число и возвращать новую функцию (F)
- При вызове функции F, переданное ранее число должно быть увеличено на единицу и возвращено из F
- Пример:
-   var f = returnCounter(10);
-   console.log(f()); // выведет 11
-   console.log(f()); // выведет 12
-   console.log(f()); // выведет 13
- */
-function returnCounter(number) {
-    number = number || 0;
 
-    return () => ++number;
+ Функция должна перебрать все свойства объекта, преобразовать их имена в верхний регистр и вернуть в виде массива
+
+ Пример:
+   upperProps({ name: 'Сергей', lastName: 'Петров' }) вернет ['NAME', 'LASTNAME']
+ */
+function upperProps(obj) {
+    return Object.keys(obj).map(prop => prop.toUpperCase());
 }
 
 /*
  Задание 5 *:
- Функция должна возвращать все переданные ей аргументы в виде массива
- Количество переданных аргументов заранее неизвестно
- Пример:
-   returnArgumentsArray(1, 2, 3) вернет [1, 2, 3]
+
+ Напишите аналог встроенного метода slice для работы с массивами
+ Посмотрите как работает slice и повторите это поведение для массива, который будет передан в параметре array
  */
-function returnArgumentsArray() {
-    // return [].slice.call(arguments);
-    return [...arguments];
+function slice(array, from, to) {
+    let result = [];
+    let begin, end;
+
+    if (array.constructor !== Array) {
+        throw new TypeError(array + ' is not an Array');
+    }
+
+    begin = from || 0;
+    end = to || array.length;
+
+    if (from < 0) {
+        begin = array.length + from;
+    }
+
+    if (to < 0) {
+        end = array.length + to;
+    }
+
+    if (to === 0) {
+        end = 0;
+    }
+
+    if (begin < 0) {
+        begin = 0;
+    }
+
+    if (end > array.length) {
+        end = array.length;
+    }
+
+    for (let i = begin; i < end; i++) {
+        result[result.length] = array[i];
+    }
+
+    return result;
 }
 
 /*
  Задание 6 *:
- Функция должна принимать другую функцию (F) и некоторое количество дополнительных аргументов
- Функция должна привязать переданные аргументы к функции F и вернуть получившуюся функцию
- Пример:
-   function sum(a, b) {
-     return a + b;
-   }
-   var newSum = bindFunction(sum, 2, 4);
-   console.log(newSum()) выведет 6
- */
-function bindFunction(fn) {
-    let args = [].slice.call(arguments, 1);
 
-    return () => fn.apply(this, args);
+ Функция принимает объект и должна вернуть Proxy для этого объекта
+ Proxy должен перехватывать все попытки записи значений свойств и возводить это значение в квадрат
+ */
+function createProxy(obj) {
+    return new Proxy(obj, {
+        set(target, prop, val) {
+            if (typeof val !== 'number') {
+                return false;
+            }
+            target[prop] = val ** 2;
+
+            return true;
+        }
+    });
 }
 
 export {
-    returnFirstArgument,
-    sumWithDefaults,
-    returnArgumentsArray,
-    returnFnResult,
-    returnCounter,
-    bindFunction
-}
+    forEach,
+    map,
+    reduce,
+    upperProps,
+    slice,
+    createProxy
+};
