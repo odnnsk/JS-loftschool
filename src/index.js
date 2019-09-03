@@ -7,7 +7,7 @@
  Посмотрите как работает forEach и повторите это поведение для массива, который будет передан в параметре array
  */
 function forEach(array, fn, thisArg) {
-    if (array.constructor !== Array) {
+    if (!Array.isArray(array)) {
         throw new TypeError(array + ' is not an Array');
     }
 
@@ -16,9 +16,6 @@ function forEach(array, fn, thisArg) {
     }
 
     for (let i = 0; i < array.length; i++) {
-        if (typeof array[i] === 'undefined') {
-            continue;
-        }
         fn.call(thisArg, array[i], i, array);
     }
 }
@@ -32,7 +29,7 @@ function forEach(array, fn, thisArg) {
 function map(array, fn, thisArg) {
     let result = [];
 
-    if (array.constructor !== Array) {
+    if (!Array.isArray(array)) {
         throw new TypeError(array + ' is not an Array');
     }
 
@@ -41,10 +38,7 @@ function map(array, fn, thisArg) {
     }
 
     for (let i = 0; i < array.length; i++) {
-        if (typeof array[i] === 'undefined') {
-            continue;
-        }
-        result[result.length] = fn.call(thisArg, array[i], i, array);
+        result[i] = fn.call(thisArg, array[i], i, array);
     }
 
     return result;
@@ -57,14 +51,7 @@ function map(array, fn, thisArg) {
  Посмотрите как работает reduce и повторите это поведение для массива, который будет передан в параметре array
  */
 function reduce(array, fn, initial) {
-    let result = initial || array[0];
-    let index = 0;
-
-    if (!initial) {
-        index = 1;
-    }
-
-    if (array.constructor !== Array) {
+    if (!Array.isArray(array)) {
         throw new TypeError(array + ' is not an Array');
     }
 
@@ -72,10 +59,15 @@ function reduce(array, fn, initial) {
         throw new TypeError(fn + ' is not a function');
     }
 
-    for (let i = index; i < array.length; i++) {
-        if (typeof array[i] === 'undefined') {
-            continue;
-        }
+    let result = initial;
+    let i = 0;
+
+    if (!initial) {
+        result = array[0];
+        i++;
+    }
+
+    for (; i < array.length; i++) {
         result = fn(result, array[i], i, array);
     }
 
@@ -101,18 +93,21 @@ function upperProps(obj) {
  Посмотрите как работает slice и повторите это поведение для массива, который будет передан в параметре array
  */
 function slice(array, from, to) {
-    let result = [];
-    let begin, end;
-
-    if (array.constructor !== Array) {
+    if (!Array.isArray(array)) {
         throw new TypeError(array + ' is not an Array');
     }
 
-    begin = from || 0;
-    end = to || array.length;
+    let result = [];
+    let begin = from || 0;
+    let end = to || array.length;
+
 
     if (from < 0) {
         begin = array.length + from;
+    }
+
+    if (begin < 0) {
+        begin = 0;
     }
 
     if (to < 0) {
@@ -121,10 +116,6 @@ function slice(array, from, to) {
 
     if (to === 0) {
         end = 0;
-    }
-
-    if (begin < 0) {
-        begin = 0;
     }
 
     if (end > array.length) {
