@@ -101,7 +101,6 @@ function slice(array, from, to) {
     let begin = from || 0;
     let end = to || array.length;
 
-
     if (from < 0) {
         begin = array.length + from;
     }
