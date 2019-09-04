@@ -225,8 +225,8 @@ function observeChildNodes(where, fn) {
 
     let config = { attributes: true, childList: true, characterData: true };
 
-    let observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
+    let observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
             if (mutation.addedNodes.length) {
                 result.type = 'insert';
                 result.nodes = [].slice.call(mutation.addedNodes).map(el => el);
