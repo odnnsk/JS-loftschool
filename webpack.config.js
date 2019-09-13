@@ -15,7 +15,7 @@ rules.push({
 
 module.exports = {
     entry: {
-        main: './src/index.js',
+        // main: './src/index.js',
         cookie: './src/cookie.js'
     },
     devServer: {
@@ -44,7 +44,7 @@ module.exports = {
         // }),
         new HtmlPlugin({
             title: 'Div Drag And Drop',
-            template: 'cookie.hbs',
+            template: './src/cookie.hbs',
             filename: 'cookie.html',
             chunks: ['cookie']
         }),
