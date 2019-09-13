@@ -1,111 +1,53 @@
 import assert from 'assert';
-import {
-    addListener,
-    removeListener,
-    skipDefault,
-    emulateClick,
-    delegate,
-    once
-} from '../src/index';
+import {delayPromise, loadAndSortTowns} from '../src/index';
 
-describe('ДЗ 5.1 - DOM Events', () => {
-    describe('addListener', () => {
-        it('должна добавлять обработчик событий элемента', () => {
-            let target = document.createElement('div');
-            let eventName = 'click';
-            let passed = false;
-            let fn = () => passed = true;
+describe('ДЗ 6.1 - Асинхронность и работа с сетью', () => {
+    describe('delayPromise', () => {
+        it('должна возвращать Promise', () => {
+            let result = delayPromise(1);
 
-            addListener(eventName, target, fn);
+            assert(result instanceof Promise);
+        });
 
-            assert(!passed);
-            target.dispatchEvent(new CustomEvent(eventName));
-            assert(passed);
+        it('Promise должен быть resolved через указанное количество секунд', done => {
+            let result = delayPromise(1);
+            let startTime = new Date();
+
+            result.then(() => {
+                assert(new Date() - startTime >= 1000);
+                done();
+            }).catch(done);
         });
     });
 
-    describe('removeListener', () => {
-        it('должна удалять обработчик событий элемента', () => {
-            let target = document.createElement('div');
-            let eventName = 'click';
-            let passed = false;
-            let fn = () => passed = true;
+    describe('loadAndSortTowns', () => {
+        it('должна возвращать Promise', () => {
+            let result = loadAndSortTowns();
 
-            target.addEventListener(eventName, fn);
-
-            removeListener(eventName, target, fn);
-
-            target.dispatchEvent(new CustomEvent(eventName));
-            assert(!passed);
+            // в FF + babel есть проблема при проверке instanceof Promise
+            // поэтому приходится проверять так
+            assert.equal(result.constructor.name, 'Promise');
+            assert.equal(typeof result.then, 'function');
+            assert.equal(typeof result.catch, 'function');
         });
-    });
 
-    describe('skipDefault', () => {
-        it('должна добавлять такой обработчик, который предотвращает действие по умолчанию', () => {
-            let target = document.createElement('div');
-            let eventName = 'click';
-            let result;
+        it('Promise должен разрешаться массивом из городов', done => {
+            /* eslint-disable max-nested-callbacks */
+            let result = loadAndSortTowns();
 
-            skipDefault(eventName, target);
+            result.then(towns => {
+                assert(Array.isArray(towns), 'должен быть массивом');
+                assert(towns.length == 50, 'неверный размер массива');
+                towns.forEach((town, i, towns) => {
+                    assert(town.hasOwnProperty('name'), 'город должен иметь свойтво name');
 
-            result = target.dispatchEvent(new CustomEvent(eventName, { cancelable: true }));
-            assert(!result);
-        });
-    });
-
-    describe('emulateClick', () => {
-        it('должна эмулировать клик по элементу', () => {
-            let target = document.createElement('div');
-            let eventName = 'click';
-            let passed = false;
-            let fn = () => passed = true;
-
-            target.addEventListener(eventName, fn);
-
-            emulateClick(target);
-
-            assert(passed);
-        });
-    });
-
-    describe('delegate', () => {
-        it('должна добавлять обработчик кликов, который реагирует только на клики по кнопкам', () => {
-            let target = document.createElement('div');
-            let eventName = 'click';
-            let passed = false;
-            let fn = () => passed = true;
-
-            target.innerHTML = '<div></div><a href="#"></a><p></p><button></button>';
-
-            delegate(target, fn);
-
-            assert(!passed);
-            target.children[0].dispatchEvent(new CustomEvent(eventName, { bubbles: true }));
-            assert(!passed);
-            target.children[1].dispatchEvent(new CustomEvent(eventName, { bubbles: true }));
-            assert(!passed);
-            target.children[2].dispatchEvent(new CustomEvent(eventName, { bubbles: true }));
-            assert(!passed);
-            target.children[3].dispatchEvent(new CustomEvent(eventName, { bubbles: true }));
-            assert(passed);
-        });
-    });
-
-    describe('once', () => {
-        it('должна добавлять обработчик кликов, который сработает только один раз и удалится', () => {
-            let target = document.createElement('div');
-            let eventName = 'click';
-            let passed = 0;
-            let fn = () => passed++;
-
-            once(target, fn);
-
-            assert.equal(passed, 0);
-            target.dispatchEvent(new CustomEvent(eventName));
-            assert.equal(passed, 1);
-            target.dispatchEvent(new CustomEvent(eventName));
-            assert.equal(passed, 1);
-            target.dispatchEvent(new CustomEvent(eventName));
+                    if (i) {
+                        assert(towns[i - 1].name < town.name, 'города должны быть отсортированы');
+                    }
+                });
+                done();
+            }).catch(done);
+            /* eslint-enable */
         });
     });
 });

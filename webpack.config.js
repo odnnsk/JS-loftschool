@@ -16,10 +16,10 @@ rules.push({
 module.exports = {
     entry: {
         main: './src/index.js',
-        dnd: './src/dnd.js'
+        towns: './src/towns.js'
     },
     devServer: {
-        index: 'dnd.html',
+        index: 'towns.html',
         port: 3000,
     },
     output: {
@@ -44,9 +44,9 @@ module.exports = {
         // }),
         new HtmlPlugin({
             title: 'Div Drag And Drop',
-            template: 'dnd.hbs',
-            filename: 'dnd.html',
-            chunks: ['dnd']
+            template: './src/towns.hbs',
+            filename: 'towns.html',
+            chunks: ['towns']
         }),
         new CleanWebpackPlugin(['dist'])
     ]
