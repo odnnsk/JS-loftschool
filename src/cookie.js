@@ -118,12 +118,16 @@ function findCookieByName(name){
     return false;
 }
 
-function filterCookie(value, flag = true) {
+function filterCookie(value, cookieName = '') {
     let cookies = cookieParser();
     let result = {};
 
+    if(cookieName && !filter(cookies[cookieName], value)){
+        delete cookies[cookieName];
+    }
+
     for (let key in cookies) {
-        if (flag ? filter(key, value) || filter(cookies[key], value) : filter(cookies[key], value)) {
+        if (filter(key, value) || filter(cookies[key], value)) {
             result[key] = cookies[key];
         }
     }
@@ -142,14 +146,16 @@ filterNameInput.addEventListener('keyup', function () {
 addButton.addEventListener('click', () => {
     if (addNameInput.value && addValueInput.value) {
 
-        setCookie(addNameInput.value, addValueInput.value, {expires: 1});
+        setCookie(addNameInput.value, addValueInput.value);
 
         if (filterNameInput.value) {
             if(findCookieByName(addNameInput.value)){
-                filterCookie(filterNameInput.value, false);
+                filterCookie(filterNameInput.value, addNameInput.value);
             }else{
                 filterCookie(filterNameInput.value);
             }
+
+            // filterCookie(filterNameInput.value);
         } else {
             updateTable();
         }
@@ -164,7 +170,12 @@ listTable.addEventListener('click', e => {
         let cookieName = e.target.dataset.cookie;
 
         deleteCookie(cookieName);
-        updateTable();
+
+        if(filterNameInput.value){
+            filterCookie(filterNameInput.value);
+        }else{
+            updateTable();
+        }
     }
 });
 
