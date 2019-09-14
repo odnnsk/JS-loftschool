@@ -43,15 +43,129 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-let cookies =
+function cookieParser() {
+    if (!document.cookie) {
 
-filterNameInput.addEventListener('keyup', function() {
-    // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
+        return {};
+    }
+
+    return document.cookie.split('; ').reduce((prev, current) => {
+        let [name, value] = current.split('=');
+
+        prev[name] = value;
+
+        return prev;
+    }, {})
+}
+
+function setCookie(name, value, options = {}) {
+    //Expires in days
+    if (typeof options.expires == 'number' && options.expires) {
+        let d = new Date();
+        d.setTime(d.getTime() + options.expires * 24 * 60 * 60 * 1000);
+        options.expires = d.toUTCString();
+    }
+
+    value = encodeURIComponent(value);
+
+    let updatedCookie = name + "=" + value;
+
+    for (let prop in options) {
+        updatedCookie += "; " + prop;
+
+        let propValue = options[prop];
+
+        if (propValue !== true) {
+            updatedCookie += "=" + propValue;
+        }
+    }
+
+    document.cookie = updatedCookie;
+}
+
+function deleteCookie(name) {
+    setCookie(name, '', {expires: -1});
+}
+
+function updateTable(cookies) {
+    let html = '';
+    cookies = cookies || cookieParser();
+
+    Object.keys(cookies).forEach(k => {
+        html += '<tr>';
+        html += '<td class="cookie-name">' + k + '</td>';
+        html += '<td>' + cookies[k] + '</td>';
+        html += '<td><button data-cookie="' + k + '" class="del-button">УДАЛИТЬ</button></td>';
+        html += '</tr>';
+    });
+
+    listTable.innerHTML = html;
+}
+
+function filter(full, chunk) {
+    return (full.toLowerCase().indexOf(chunk.toLocaleLowerCase()) + 1) ? true : false;
+}
+
+function findCookieByName(name){
+    let cookies = cookieParser();
+
+    for (let key in cookies) {
+        if(key === name){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function filterCookie(value, flag = true) {
+    let cookies = cookieParser();
+    let result = {};
+
+    for (let key in cookies) {
+        if (flag ? filter(key, value) || filter(cookies[key], value) : filter(cookies[key], value)) {
+            result[key] = cookies[key];
+        }
+    }
+
+    updateTable(result);
+}
+
+filterNameInput.addEventListener('keyup', function () {
+    if (this.value) {
+        filterCookie(this.value);
+    } else {
+        updateTable();
+    }
 });
 
 addButton.addEventListener('click', () => {
-    if (addNameInput.value && addValueInput.value){
+    if (addNameInput.value && addValueInput.value) {
 
+        setCookie(addNameInput.value, addValueInput.value, {expires: 1});
+
+        if (filterNameInput.value) {
+            if(findCookieByName(addNameInput.value)){
+                filterCookie(filterNameInput.value, false);
+            }else{
+                filterCookie(filterNameInput.value);
+            }
+        } else {
+            updateTable();
+        }
+
+        addNameInput.value = '';
+        addValueInput.value = '';
     }
-
 });
+
+listTable.addEventListener('click', e => {
+    if (e.target.classList.contains('del-button')) {
+        let cookieName = e.target.dataset.cookie;
+
+        deleteCookie(cookieName);
+        updateTable();
+    }
+});
+
+updateTable();
