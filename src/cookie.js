@@ -43,40 +43,48 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
+// function cookieParser() {
+//     return document.cookie.split('; ').reduce((prev, current) => {
+//         let [name, value] = current.split('=');
+//         prev[name] = value;
+//         return prev;
+//     }, {})
+// }
+
 function cookieParser() {
-    if (!document.cookie) {
+    return document.cookie
+        .split('; ')
+        .filter(Boolean)
+        .map(cookie => cookie.match(/^([^=]+)=(.+)/))
+        .reduce((obj, [, name, value]) => {
+            obj[name] = value;
 
-        return {};
-    }
-
-    return document.cookie.split('; ').reduce((prev, current) => {
-        let [name, value] = current.split('=');
-
-        prev[name] = value;
-
-        return prev;
-    }, {})
+            return obj;
+        }, {});
 }
 
 function setCookie(name, value, options = {}) {
-    //Expires in days
+    // Expires in days
     if (typeof options.expires == 'number' && options.expires) {
         let d = new Date();
+
         d.setTime(d.getTime() + options.expires * 24 * 60 * 60 * 1000);
         options.expires = d.toUTCString();
     }
 
     value = encodeURIComponent(value);
 
-    let updatedCookie = name + "=" + value;
+    let updatedCookie = name + '=' + value;
 
     for (let prop in options) {
-        updatedCookie += "; " + prop;
+        if (options.hasOwnProperty(prop)) {
+            updatedCookie += '; ' + prop;
 
-        let propValue = options[prop];
+            let propValue = options[prop];
 
-        if (propValue !== true) {
-            updatedCookie += "=" + propValue;
+            if (propValue !== true) {
+                updatedCookie += '=' + propValue;
+            }
         }
     }
 
@@ -84,18 +92,19 @@ function setCookie(name, value, options = {}) {
 }
 
 function deleteCookie(name) {
-    setCookie(name, '', {expires: -1});
+    setCookie(name, '', { expires: -1 });
 }
 
 function updateTable(cookies) {
     let html = '';
+
     cookies = cookies || cookieParser();
 
     Object.keys(cookies).forEach(k => {
         html += '<tr>';
-        html += '<td class="cookie-name">' + k + '</td>';
-        html += '<td>' + cookies[k] + '</td>';
-        html += '<td><button data-cookie="' + k + '" class="del-button">УДАЛИТЬ</button></td>';
+        html += `<td class="cookie-name">${ k }</td>`;
+        html += `<td>${ cookies[k] }</td>`;
+        html += `<td><button data-cookie="${ k }" class="del-button">УДАЛИТЬ</button></td>`;
         html += '</tr>';
     });
 
@@ -106,11 +115,11 @@ function filter(full, chunk) {
     return (full.toLowerCase().indexOf(chunk.toLocaleLowerCase()) + 1) ? true : false;
 }
 
-function findCookieByName(name){
+function findCookieByName(name) {
     let cookies = cookieParser();
 
     for (let key in cookies) {
-        if(key === name){
+        if (key === name) {
             return true;
         }
     }
@@ -122,7 +131,7 @@ function filterCookie(value, cookieName = '') {
     let cookies = cookieParser();
     let result = {};
 
-    if(cookieName && !filter(cookies[cookieName], value)){
+    if (cookieName && !filter(cookies[cookieName], value)) {
         delete cookies[cookieName];
     }
 
@@ -149,19 +158,17 @@ addButton.addEventListener('click', () => {
         setCookie(addNameInput.value, addValueInput.value);
 
         if (filterNameInput.value) {
-            if(findCookieByName(addNameInput.value)){
+            if (findCookieByName(addNameInput.value)) {
                 filterCookie(filterNameInput.value, addNameInput.value);
-            }else{
+            } else {
                 filterCookie(filterNameInput.value);
             }
-
-            // filterCookie(filterNameInput.value);
         } else {
             updateTable();
         }
 
-        addNameInput.value = '';
-        addValueInput.value = '';
+        // addNameInput.value = '';
+        // addValueInput.value = '';
     }
 });
 
@@ -171,9 +178,9 @@ listTable.addEventListener('click', e => {
 
         deleteCookie(cookieName);
 
-        if(filterNameInput.value){
+        if (filterNameInput.value) {
             filterCookie(filterNameInput.value);
-        }else{
+        } else {
             updateTable();
         }
     }
