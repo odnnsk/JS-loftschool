@@ -15,11 +15,10 @@ rules.push({
 
 module.exports = {
     entry: {
-        // main: './src/index.js',
-        cookie: './src/cookie.js'
+        main: './src/index.js',
     },
     devServer: {
-        index: 'cookie.html',
+        index: 'index.html',
         port: 3000,
     },
     output: {
@@ -29,24 +28,12 @@ module.exports = {
     devtool: 'source-map',
     module: { rules },
     plugins: [
-        // new webpack.optimize.UglifyJsPlugin({
-        //     sourceMap: true,
-        //     compress: {
-        //         drop_debugger: false,
-        //         warnings: false
-        //     }
-        // }),
         new ExtractTextPlugin('styles.css'),
-        // new HtmlPlugin({
-        //     title: 'Main Homework',
-        //     template: 'main.hbs',
-        //     chunks: ['main']
-        // }),
         new HtmlPlugin({
-            title: 'Div Drag And Drop',
-            template: './src/cookie.hbs',
-            filename: 'cookie.html',
-            chunks: ['cookie']
+            title: 'YA Maps API',
+            template: './index.hbs',
+            filename: 'index.html',
+            chunks: ['main']
         }),
         new CleanWebpackPlugin(['dist'])
     ]
