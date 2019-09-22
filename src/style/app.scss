@@ -1,0 +1,21 @@
+$main-font-color : #fff;
+$main-hover-color : #7400f4;
+$main-font : 'Montserrat', sans-serif;
+
+
+//mixins
+@import "helpers/mixins";
+
+//layout setups
+@import "layout/fonts";
+@import "layout/setups";
+
+ 
+//blocks
+//@import "blocks/**/*";
+@import "blocks/main";
+
+
+
+
+
