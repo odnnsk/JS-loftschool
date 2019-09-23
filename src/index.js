@@ -166,13 +166,22 @@ function init() {
                 myMap.geoObjects.add(circle);
 
                 queryObjects = objectManager.objects.getAll().map(el => el.geometry);
+                
+                console.log(queryObjects);
 
-                result = ymaps.geoQuery(queryObjects).searchInside(circle).each(el => {
-                    // console.log(el.properties.get('name'));
-                    // console.log(el.get('objectId'));
-                    
-                    console.log(el);
-                });
+                // result = ymaps.geoQuery(queryObjects).searchInside(circle);
+                result = ymaps.geoQuery(queryObjects).search('geometry.coordinates.0 = "' + coords[0] + '"').search('geometry.coordinates.1 = "' + coords[1] + '"');
+                console.log(result);//GeoQueryResult 
+                console.log(result.get(0));//GeoQueryResult 
+                console.log(result.get(0).properties);//GeoQueryResult 
+
+
+                // result = ymaps.geoQuery(queryObjects).searchInside(circle).each(el => {
+                //     // console.log(el.properties.get('name'));
+                //     // console.log(el.get('objectId'));
+                //
+                //     console.log(el);
+                // });
 
 
                 // result = objectManager.objects.getAll().filter(el => {
@@ -186,12 +195,14 @@ function init() {
                 // console.log(result.get(0).properties);
                 myMap.geoObjects.remove(circle);
 
-                console.log(objectManager.objects.getAll());
+                
+                ymaps.geocode(coords).then(function (res) {
+                    let firstGeoObject = res.geoObjects.get(0);
 
-                
-                // circle.contains(myObjects[i].geometry.getCoordinates());
-                
-                console.log(result);
+                    console.log(res.geoObjects.get(0));
+                    
+                    return firstGeoObject.getAddressLine();
+                });
 
                 
 
@@ -226,6 +237,15 @@ function init() {
         },
         {
             id: 2,
+            coords: [55.67, 37.65],
+            name: 'Pavel',
+            place: 'Шоколадница2',
+            comment: 'Все круто2!!!!',
+            date: '12.12.2019',
+            address: 'Новосибирск, Ипподромская, 462'
+        },
+        {
+            id: 3,
             coords: [55.63, 38.79],
             name: 'Pavel2',
             place: 'Шоколадница3',
