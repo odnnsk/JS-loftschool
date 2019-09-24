@@ -10,6 +10,11 @@ import './img/close.png';
 ymaps.ready(init);
 
 function init() {
+    let data = JSON.parse(localStorage.data || '[]');
+    let clusterData = JSON.parse(localStorage.clusterData || '{}');
+    let commentFormCoords;
+    let markerId = data.length - 1 || 0;
+
     let myMap = new ymaps.Map("map", {
         center: [55.76, 37.64],
         zoom: 7
@@ -20,7 +25,6 @@ function init() {
         gridSize: 32,
         clusterDisableClickZoom: true
     });
-
 
 
     /*
@@ -43,17 +47,30 @@ function init() {
         '</div>' +
         '<div class="popup-comment-list">' +
         '<ul class="popup-comment-list__wrap">' +
-        '{% if properties.name %}' +
-        '<li class="popup-comment-list__el">' +
-        '<div class="popup-comment-list__header">' +
-        '<div class="popup-comment-list__name">{{ properties.name }}</div>' +
-        '<div class="popup-comment-list__place">{{ properties.place }}</div>' +
-        '<div class="popup-comment-list__date">{{ properties.date }}</div>' +
-        '</div>' +
-        '<div class="popup-comment-list__desc">{{ properties.comment }}</div>' +
-        '</li>' +
+        '{% if comments %}' +
+            '{% for comment in comments %}' +
+            '<li class="popup-comment-list__el">' +
+            '<div class="popup-comment-list__header">' +
+            '<div class="popup-comment-list__name">{{ comment.name }}</div>' +
+            '<div class="popup-comment-list__place">{{ comment.place }}</div>' +
+            '<div class="popup-comment-list__date">{{ comment.date }}</div>' +
+            '</div>' +
+            '<div class="popup-comment-list__desc">{{ comment.comment }}</div>' +
+            '</li>' +
+            '{% endfor %}' +
         '{% else %}' +
-        '<li class="popup-comment-list__el popup-comment-list__el--empty">Отзывов пока нет...</li>' +
+            '{% if properties.name %}' +
+            '<li class="popup-comment-list__el">' +
+            '<div class="popup-comment-list__header">' +
+            '<div class="popup-comment-list__name">{{ properties.name }}</div>' +
+            '<div class="popup-comment-list__place">{{ properties.place }}</div>' +
+            '<div class="popup-comment-list__date">{{ properties.date }}</div>' +
+            '</div>' +
+            '<div class="popup-comment-list__desc">{{ properties.comment }}</div>' +
+            '</li>' +
+            '{% else %}' +
+            '<li class="popup-comment-list__el popup-comment-list__el--empty">Отзывов пока нет...</li>' +
+            '{% endif %}' +
         '{% endif %}' +
         '</ul>' +
         '<hr>' +
@@ -93,7 +110,7 @@ function init() {
                 let date = formatDate(new Date());
 
                 if (!errors.length) {
-                    if (commentList.children.length === 1 && commentList.firstElementChild.classList.contains('popup-comment-list__el--empty')){
+                    if (commentList.children.length === 1 && commentList.firstElementChild.classList.contains('popup-comment-list__el--empty')) {
                         commentList.firstElementChild.remove();
                     }
 
@@ -103,24 +120,30 @@ function init() {
                     //Add point to objectManager
                     objectManager.add({
                         type: 'Feature',
-                        id: markerId++,
+                        id: ++markerId,
                         geometry: {
                             type: 'Point',
                             coordinates: commentFormCoords
                         },
                         properties: {
-                            // balloonContent: 'Содержание балуна'
                             name: form.elements.name.value,
                             place: form.elements.place.value,
                             comment: form.elements.comment.value,
                             date,
-                            address
+                            address,
+                            coords: commentFormCoords
                         }
                     });
 
-                    // console.log(objectManager.objects.getAll());
-
                     myMap.geoObjects.add(objectManager);
+
+                    //Save data to localStorage
+                    saveData('data', objectManager.objects.getAll());
+
+                    //Put id in clusterData obj
+                    createClusterData(markerId, commentFormCoords);
+                    //Save data to localStorage
+                    saveClusterData('clusterData', clusterData);
 
                     //Clear inputs
                     form.elements.name.value = '';
@@ -140,13 +163,14 @@ function init() {
     * */
     let ClusterItemContentLayout = ymaps.templateLayoutFactory.createClass(
         '<h2 class="cluster-header">{{ properties.place }}</h2>' +
+        // '<a data-coords="{{ properties.coords }}" class="cluster-address" href="#">{{ properties.address }}</a>' +
         '<a data-coords="{{ properties.coords }}" class="cluster-address" href="#">{{ properties.address }}</a>' +
         '<div class="cluster-comment">{{ properties.comment }}</div>' +
         '<div class="cluster-date">{{ properties.date }}</div>',
         {
             build: function () {
                 ClusterItemContentLayout.superclass.build.call(this);
-                
+
                 this.addressLink = document.querySelector('.cluster-address');
                 this.addressLink.addEventListener('click', this.onAddrLinkClick);
             },
@@ -163,99 +187,54 @@ function init() {
                 let result;
 
                 //Find markers by coords
-                myMap.geoObjects.add(circle);
-
-                queryObjects = objectManager.objects.getAll().map(el => el.geometry);
-                
-                console.log(queryObjects);
-
-                // result = ymaps.geoQuery(queryObjects).searchInside(circle);
-                result = ymaps.geoQuery(queryObjects).search('geometry.coordinates.0 = "' + coords[0] + '"').search('geometry.coordinates.1 = "' + coords[1] + '"');
-                console.log(result);//GeoQueryResult 
-                console.log(result.get(0));//GeoQueryResult 
-                console.log(result.get(0).properties);//GeoQueryResult 
-
-
-                // result = ymaps.geoQuery(queryObjects).searchInside(circle).each(el => {
-                //     // console.log(el.properties.get('name'));
-                //     // console.log(el.get('objectId'));
+                // myMap.geoObjects.add(circle);
                 //
-                //     console.log(el);
+                // queryObjects = objectManager.objects.getAll().map(el => el.geometry);
+                // // queryObjects = objectManager.objects.getAll();
+                //
+                // console.log(queryObjects);
+                //
+                // // result = ymaps.geoQuery(queryObjects).searchInside(circle);
+                // result = ymaps.geoQuery(queryObjects).search('geometry.coordinates.0 = "' + coords[0] + '"').search('geometry.coordinates.1 = "' + coords[1] + '"');
+                // console.log(result);//GeoQueryResult
+                // console.log(result.get(0));//GeoQueryResult
+                // console.log(result.get(0).properties.getAll());//GeoQueryResult
+                //
+                //
+                // result.each(el => {
+                //     // console.log(el);
+                //
+                //     // console.log(el.properties.get('name'));
+                //     console.log(el.options.get('preset'));
                 // });
-
-
-                // result = objectManager.objects.getAll().filter(el => {
-                //     console.log(el.geometry.coordinates);
-                //     // console.log(el.geometry.getCoordinates());
-                //     return circle.contains(el.geometry.coordinates);
-                // });
-
-
-                // console.log(objectManager.objects.getAll());
-                // console.log(result.get(0).properties);
-                myMap.geoObjects.remove(circle);
-
                 
-                ymaps.geocode(coords).then(function (res) {
-                    let firstGeoObject = res.geoObjects.get(0);
+                // console.log(typeof coords[0]);
+                // console.log(typeof +coords[0]);
+                // console.log(+coords[0]);
+                // console.log(56.21265153900809.toPrecision(4));
+                // console.log(+coords[0].toPrecision(4));
 
-                    console.log(res.geoObjects.get(0));
+
+
+                let key = createClusterDataKey(coords);
+                let arr = clusterData[key];
+                let comments = arr.reduce((prev, current, index, arr) => {
+                    let { properties: { name, place, comment, date } } = objectManager.objects.getById(arr[index]);
                     
-                    return firstGeoObject.getAddressLine();
-                });
+                    prev.push({ name, place, comment, date });
+                    
+                    return prev;
+                }, []);
 
-                
+                getAddress(coords).then(address => {
+                    openCommentForm(coords, address, comments);
+                });
 
                 //Close balloon
                 myMap.balloon.close();
-
-                console.log(coords);
-                console.log(e.target);
             }
         }
     );
-
-
-    let data = [
-        {
-            id: 0,
-            coords: [55.67, 37.65],
-            name: 'Ivan',
-            place: 'Шоколадница',
-            comment: 'Все круто!!!!',
-            date: '12.12.2019',
-            address: 'Новосибирск, Ипподромская, 46'
-        },
-        {
-            id: 1,
-            coords: [55.67, 37.65],
-            name: 'Pavel',
-            place: 'Шоколадница2',
-            comment: 'Все круто2!!!!',
-            date: '12.12.2019',
-            address: 'Новосибирск, Ипподромская, 462'
-        },
-        {
-            id: 2,
-            coords: [55.67, 37.65],
-            name: 'Pavel',
-            place: 'Шоколадница2',
-            comment: 'Все круто2!!!!',
-            date: '12.12.2019',
-            address: 'Новосибирск, Ипподромская, 462'
-        },
-        {
-            id: 3,
-            coords: [55.63, 38.79],
-            name: 'Pavel2',
-            place: 'Шоколадница3',
-            comment: 'Все круто3!!!!',
-            date: '12.12.2019',
-            address: 'Новосибирск, Ипподромская, 4623'
-        },
-    ];
-    let commentFormCoords;
-    let markerId = data.length || 0;
 
 
     /*
@@ -284,8 +263,8 @@ function init() {
     * */
     let markersObjects = [];
 
-    if(data.length !== 0){
-        for(let i = 0; i < data.length; i++){
+    if (data.length !== 0) {
+        for (let i = 0; i < data.length; i++) {
             markersObjects.push({
                 type: 'Feature',
                 id: data[i].id,
@@ -312,6 +291,26 @@ function init() {
     /*
     * Utils functions
     * */
+
+    //Save data to localStorage
+    function saveClusterData(key, value) {
+        localStorage[key] = JSON.stringify(value);
+    }
+
+    function saveData(key, value) {
+        localStorage[key] = JSON.stringify(value.map(el => {
+            return {
+                id: el.id,
+                coords: el.geometry.coordinates,
+                name: el.properties.name,
+                place: el.properties.place,
+                comment: el.properties.comment,
+                date: el.properties.date,
+                address: el.properties.address
+            }
+        }));
+    }
+
     function formatDate(date) {
         let dd = date.getDate();
         let mm = date.getMonth() + 1;
@@ -321,7 +320,7 @@ function init() {
         if (mm < 10) mm = '0' + mm;
         if (yy < 10) yy = '0' + yy;
 
-        return `${ dd }.${ mm }.${ yy }`;
+        return `${dd}.${mm}.${yy}`;
     }
 
     function buildCommentHtml(name, place, comment, date) {
@@ -331,17 +330,17 @@ function init() {
         li.classList.add('popup-comment-list__el');
 
         html += '<div class="popup-comment-list__header">' +
-        '<div class="popup-comment-list__name">' + name + '</div>' +
-        '<div class="popup-comment-list__place">' + place + '</div>' +
-        '<div class="popup-comment-list__date">' + date + '</div>' +
-        '</div>' +
-        '<div class="popup-comment-list__desc">' + comment + '</div>';
+            '<div class="popup-comment-list__name">' + name + '</div>' +
+            '<div class="popup-comment-list__place">' + place + '</div>' +
+            '<div class="popup-comment-list__date">' + date + '</div>' +
+            '</div>' +
+            '<div class="popup-comment-list__desc">' + comment + '</div>';
 
         li.innerHTML = html;
 
         return li;
     }
-    
+
     function validateForm(form) {
         let elements = form.elements;
         let error = [];
@@ -358,11 +357,12 @@ function init() {
         return error;
     }
 
-    function openCommentForm(coords, address) {
+    function openCommentForm(coords, address, comments = []) {
         commentFormCoords = coords;
 
         myMap.balloon.open(coords, {
-            address
+            address,
+            comments
         }, {
             layout: BalloonContentLayout
         });
@@ -376,8 +376,20 @@ function init() {
         });
     }
 
+    function createClusterDataKey(coords) {
+        return `${Number(coords[0]).toPrecision(4)},${Number(coords[1]).toPrecision(4)}`;
+    }
 
-    // Создание метки.
+    function createClusterData(id, coords) {
+        let clusterDataKey = createClusterDataKey(coords);
+
+        if (clusterDataKey in clusterData) {
+            clusterData[clusterDataKey].push(id);
+        } else {
+            clusterData[clusterDataKey] = [id];
+        }
+    }
+
     function createPlacemark(coords) {
         return new ymaps.Placemark(coords, {}, {
             preset: 'islands#violetDotIconWithCaption',
@@ -396,237 +408,10 @@ function init() {
         openCommentForm(coords, address);
     });
 
-
-
-
-
     objectManager.objects.events.add('balloonopen', function (e) {
-        // Получим объект, на котором открылся балун.
         let id = e.get('objectId');
         let geoObject = objectManager.objects.getById(id);
 
         commentFormCoords = geoObject.geometry.coordinates;
-
-
-
-
-        // console.log(commentFormCoords);
-
-        console.log(id);
-        console.log(geoObject);
-
-        // Загрузим данные для объекта при необходимости.
-        downloadContent([geoObject], id);
     });
-
-    // objectManager.clusters.events.add('balloonopen', function (e) {
-    //     // Получим id кластера, на котором открылся балун.
-    //     var id = e.get('objectId'),
-    //         // Получим геообъекты внутри кластера.
-    //         cluster = objectManager.clusters.getById(id),
-    //         geoObjects = cluster.properties.geoObjects;
-    //
-    //     // console.log(id);
-    //     // console.log(cluster.properties);
-    //     // console.log(geoObject);
-    //
-    //     // Загрузим данные для объектов при необходимости.
-    //     downloadContent(geoObjects, id, true);
-    // });
-
-
-
-
-    function downloadContent(geoObjects, id, isCluster) {
-        // Создадим массив меток, для которых данные ещё не загружены.
-        let array = geoObjects.filter(function (geoObject) {
-                return geoObject.properties.balloonContent === 'идет загрузка...' ||
-                    geoObject.properties.balloonContent === 'Not found';
-            });
-            // Формируем массив идентификаторов, который будет передан серверу.
-        let ids = array.map(function (geoObject) {
-                return geoObject.id;
-            });
-
-        // console.log(ids);
-        // console.log(ids);
-
-        // if (ids.length) {
-        //     // Запрос к серверу.
-        //     // Сервер обработает массив идентификаторов и на его основе
-        //     // вернет JSON-объект, содержащий текст балуна для
-        //     // заданных меток.
-        //     ymaps.vow.resolve($.ajax({
-        //         // Обратите внимание, что серверную часть необходимо реализовать самостоятельно.
-        //         //contentType: 'application/json',
-        //         //type: 'POST',
-        //         //data: JSON.stringify(ids),
-        //         url: 'content.json',
-        //         dataType: 'json',
-        //         processData: false
-        //     })).then(function (data) {
-        //         // Имитируем задержку от сервера.
-        //         return ymaps.vow.delay(data, 1000);
-        //     }).then(
-        //         function (data) {
-        //             geoObjects.forEach(function (geoObject) {
-        //                 // Содержимое балуна берем из данных, полученных от сервера.
-        //                 // Сервер возвращает массив объектов вида:
-        //                 // [ {"balloonContent": "Содержимое балуна"}, ...]
-        //                 geoObject.properties.balloonContent = data[geoObject.id].balloonContent;
-        //             });
-        //             // Оповещаем балун, что нужно применить новые данные.
-        //             setNewData();
-        //         }
-        //     );
-        // }
-
-        function setNewData(){
-            if (isCluster && objectManager.clusters.balloon.isOpen(id)) {
-                objectManager.clusters.balloon.setData(objectManager.clusters.balloon.getData());
-            } else if (objectManager.objects.balloon.isOpen(id)) {
-                objectManager.objects.balloon.setData(objectManager.objects.balloon.getData());
-            }
-        }
-    }
-
-
-    
-
-
-//     function onClusterClick (e) {
-//         var objectId = e.get('objectId');
-//         if (e.get('type') === 'mouseenter') {
-//             objectManager.clusters.setObjectOptions(objectId, {
-//                 preset: 'islands#yellowIcon'
-//             });
-//         } else {
-//             objectManager.clusters.setObjectOptions(objectId, {
-//                 preset: 'islands#blueIcon'
-//             });
-//         }
-//     }
-//
-// // Назначаем обработчик событий для коллекции объектов-кластеров менеджера.
-//     objectManager.clusters.events.add(['click'], onClusterEvent);
-
-
-
-
-
-
-    // Слушаем клик на карте.
-    // myMap.events.add('click', function (e) {
-    //     var coords = e.get('coords');
-    //
-    //     // Если метка уже создана – просто передвигаем ее.
-    //     if (myPlacemark) {
-    //         myPlacemark.geometry.setCoordinates(coords);
-    //     }
-    //     // Если нет – создаем.
-    //     else {
-    //         myPlacemark = createPlacemark(coords);
-    //         myMap.geoObjects.add(myPlacemark);
-    //         // Слушаем событие окончания перетаскивания на метке.
-    //         myPlacemark.events.add('dragend', function () {
-    //             getAddress(myPlacemark.geometry.getCoordinates());
-    //         });
-    //     }
-    //     getAddress(coords);
-    // });
-
-
-
-
-    // Определяем адрес по координатам (обратное геокодирование).
-    // function getAddress(coords) {
-    //     myPlacemark.properties.set('iconCaption', 'поиск...');
-    //     ymaps.geocode(coords).then(function (res) {
-    //         var firstGeoObject = res.geoObjects.get(0);
-    //
-    //         myPlacemark.properties
-    //             .set({
-    //                 // Формируем строку с данными об объекте.
-    //                 iconCaption: [
-    //                     // Название населенного пункта или вышестоящее административно-территориальное образование.
-    //                     firstGeoObject.getLocalities().length ? firstGeoObject.getLocalities() : firstGeoObject.getAdministrativeAreas(),
-    //                     // Получаем путь до топонима, если метод вернул null, запрашиваем наименование здания.
-    //                     firstGeoObject.getThoroughfare() || firstGeoObject.getPremise()
-    //                 ].filter(Boolean).join(', '),
-    //                 // В качестве контента балуна задаем строку с адресом объекта.
-    //                 balloonContent: firstGeoObject.getAddressLine()
-    //             });
-    //     });
-    // }
-
-
-
-    // var placemark = new ymaps.Placemark([55.650625, 37.62708], {
-    //     name: 'Считаем'
-    // }, {
-    //     balloonContentLayout: BalloonContentLayout,
-    //     // Запретим замену обычного балуна на балун-панель.
-    //     // Если не указывать эту опцию, на картах маленького размера откроется балун-панель.
-    //     balloonPanelMaxMapArea: 0
-    // });
-    //
-    // myMap.geoObjects.add(placemark);
-
-
-
-    let myPlacemark;
-
-
-    // let mapForm = new ymaps.Hint(myMap, {
-    //     // projection: ymaps.projection.wgs84Mercator,
-    //     layout: ymaps.templateLayoutFactory.createClass(
-    //         '<h1 class="{{ options.colorClass }}">' +
-    //         'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS' +
-    //         '</h1>'
-    //     )
-    // });
-    //
-    // console.log(mapForm);
-    // console.log(myMap.getCenter());
-    //
-    // mapForm.open(myMap.getCenter(), 'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
-    //
-    // myMap.hint.open(myMap.getCenter(), "Одинокий хинт без метки", {
-    //     // Опция: задержка перед открытием.
-    //     openTimeout: 1500
-    // });
-
-
-
-
-
-
-
-
-    /*
-    * Baloon
-    * form
-    * */
-
-    // Создание независимого экземпляра балуна и отображение его в центре карты.
-//     var balloon = new ymaps.Balloon(myMap);
-// // Здесь родительскими устанавливаются опции карты,
-// // где содержатся значения по умолчанию для обязательных опций.
-//     balloon.options.setParent(myMap.options);
-//
-//
-//     // balloon.options.layout = BalloonContentLayout;
-//
-//     balloon.options.set({
-//         layout: BalloonContentLayout
-//     });
-//
-//
-// // Открываем балун в центре карты.
-//     balloon.open(myMap.getCenter());
-
 }
-
-
-
-
