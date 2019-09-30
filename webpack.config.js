@@ -6,26 +6,26 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 let rules = require('./webpack.config.rules');
 let path = require('path');
 
-rules.push({
-    test: /\.css$/,
-    use: ExtractTextPlugin.extract({
-        fallback: 'style-loader',
-        use: 'css-loader'
-    })
-});
+// rules.push({
+//     test: /\.css$/,
+//     use: ExtractTextPlugin.extract({
+//         fallback: 'style-loader',
+//         use: 'css-loader'
+//     })
+// });
 
 module.exports = {
     entry: {
         main: './src/index.js',
     },
+    output: {
+        filename: '[name].[hash].js',
+        path: path.resolve('dist')
+    },
     devServer: {
         // index: 'index.html',
         contentBase: path.join(__dirname, "src"),
         port: 3000,
-    },
-    output: {
-        filename: '[name].[hash].js',
-        path: path.resolve('dist')
     },
     devtool: 'source-map',
     module: { rules },
@@ -42,9 +42,9 @@ module.exports = {
         }),
         new HtmlPlugin({
             title: 'YA Maps API',
-            template: './index.hbs',
+            template: './src/views/index.hbs',
             filename: 'index.html',
-            chunks: ['main']
+            // chunks: ['main']
         }),
         new CleanWebpackPlugin(['dist'])
     ]

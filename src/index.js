@@ -1,13 +1,13 @@
-// import './style/app.scss';
-import './img/marker.png';
-import './img/marker-active.png';
-import './img/geo.png';
-import './img/close.png';
+import './style/app.scss';
+// import './img/marker.png';
+// import './img/marker-active.png';
+// import './img/geo.png';
+// import './img/close.png';
 
 /*
 * Ya map init
 * */
-ymaps.ready(init);
+// ymaps.ready(init);
 
 function init() {
     let data = JSON.parse(localStorage.data || '[]');

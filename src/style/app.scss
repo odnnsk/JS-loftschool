@@ -1,21 +1,418 @@
+$bg-color : #09101a;
+$bg-chat : #0e1621;
+$bg-interface : #17212b;
 $main-font-color : #fff;
+$second-font-color : #7f91a4;
 $main-hover-color : #7400f4;
-$main-font : 'Montserrat', sans-serif;
+$main-font : 'Ubuntu', sans-serif;
 
 
 //mixins
 @import "helpers/mixins";
 
 //layout setups
-@import "layout/fonts";
-@import "layout/setups";
+//@import "layout/fonts";
+//@import "layout/setups";
 
- 
+
 //blocks
 //@import "blocks/**/*";
 @import "blocks/main";
 
 
+//////////////////////////////////////////////////////////
+/*
+	Fonts
+*/
+@import url('https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&display=swap&subset=cyrillic');
+
+
+/*
+	Setup
+*/
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: $main-font;
+	font-size: 14px;
+	line-height: 1.42;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background-color: $bg-color;
+	color: $main-font-color;
+}
+
+ul {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+p {
+	margin: 0;
+}
+
+h1, h2, h3, h4, h5 {
+	margin-top: 0;
+	margin-bottom: 0;
+	font-weight: normal;
+}
+
+h2 {
+	font-family: $main-font;
+}
+
+::selection {
+	background: $main-hover-color;
+	color:#fff;
+}
+
+::-moz-selection {
+	background: $main-hover-color;
+	color:#fff;
+}
+
+a {
+	text-decoration: none;
+	outline: none;
+	color: #333333;
+}
+
+a:hover, a:active, a:focus {
+	text-decoration: none;
+	outline: none;
+	color: $main-hover-color;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+::placeholder {
+	color: #858e97;
+}
+
+.wrapper {
+	min-height: 100%;
+	position: relative;
+	// overflow: hidden;//CHECK
+}
+
+.content-wrapper{
+	min-height: 500px;
+	// background-color: #FFF;
+}
+
+section{
+	position: relative;
+	z-index: 100;
+}
+
+.section{
+	padding: 160px 0;
+	@include tablet{
+		padding: 100px 0;
+	}
+}
+
+.clear{
+	clear: both;
+}
+
+/*
+	BUTTONS
+*/
+.btn{
+	display: block;
+	font-size: 14px;
+	font-weight: 600;
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	background-color: #5288c1;
+	outline: none;
+	cursor: pointer;
+	transition: 0.5s;
+	&:hover{
+		background-color: #7ca1c7;
+	}
+}
+
+.btn--auth{
+	width: 135px;
+	height: 40px;
+	margin: 0 auto;
+	margin-top: 15px;
+	text-transform: uppercase;
+}
+
+.btn--send-message{
+	width: 115px;
+	height: 30px;
+}
 
 
 
+/*
+	Auth
+*/
+.auth{
+	position: relative;
+	height: 100vh;
+	min-height: 650px;
+	margin: 0 15px;
+}
+
+.auth__inner{
+	position: absolute;
+	width: 100%;
+	max-width: 500px;
+	//margin: 0 auto;
+	padding: 50px;
+	background-color: $bg-interface;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.auth__wrap{
+	max-width: 300px;
+	margin: 0 auto;
+}
+
+.auth__img{
+	margin-bottom: 25px;
+	text-align: center;
+}
+
+.auth__title{
+	margin-bottom: 10px;
+	font-size: 24px;
+	font-weight: 500;
+	text-align: center;
+}
+
+.auth__desc{
+	font-size: 16px;
+	font-weight: 300;
+	color: #7f91a4;
+	text-align: center;
+}
+
+.auth-form{
+	margin-top: 30px;
+}
+
+.auth-form__input{
+	background: none;
+	border: none;
+	outline: none;
+	width: 100%;
+	margin-bottom: 25px;
+	padding: 10px;
+	border-bottom: 1px solid #465362;
+	font-size: 16px;
+	font-weight: 300;
+	color: #e5e5e5;
+	transition: 0.3s;
+	&:hover, &:focus, &:active{
+		border-bottom: 1px solid #5288c1;
+	}
+}
+
+
+/*
+	CHAT
+*/
+.chat{
+	display: flex;
+	height: 100vh;
+}
+
+//Chat sidebar
+.chat-sidebar{
+	width: 260px;
+	height: 100vh;
+	padding: 10px 15px;
+	background-color: $bg-interface;
+	border-right: 1px solid $bg-chat;
+}
+
+.chat-sidebar__header{
+	display: flex;
+	align-items: center;
+}
+
+//Menu
+.chat-menu{
+	position: relative;
+	width: 18px;
+	height: 12px;
+	margin-right: 10px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	flex-direction: column;
+}
+
+.chat-menu__bar{
+	width: 100%;
+	height: 2px;
+	background-color: #6c7883;
+	transition: transform .3s ease, opacity .3s ease;
+	&:nth-child(1) {
+		transform-origin: right top;
+	}
+	&:nth-child(2) {
+		transform-origin: right center;
+	}
+	&:nth-child(3) {
+		transform-origin: right bottom;
+	}
+}
+
+//Chat search
+.chat-search{
+	flex: 1;
+}
+
+.chat-search__input{
+	width: 100%;
+	background: none;
+	border: none;
+	outline: none;
+	padding: 10px 8px;
+	background-color: #242f3d;
+	font-weight: 300;
+	border-radius: 4px;
+	color: $main-font-color;
+}
+
+
+/*
+	CHAT CONTENT
+*/
+.chat-content{
+	flex: 1;
+}
+
+
+/*
+	CHAT HEADER
+*/
+.chat-header{
+	padding: 20px 10px;
+	background-color: $bg-interface;
+}
+
+.chat-header__title{
+	font-weight: 300;
+	color: $main-font-color;
+}
+
+.chat-header__users{
+	color: $second-font-color;
+}
+
+/*
+	CHAT LIST
+*/
+.chat-content{
+	display: flex;
+	flex-direction: column;
+}
+
+.chat-list{
+	flex: 1;
+	padding: 22px 10px;
+	background-color: $bg-chat;
+}
+
+.chat-message{
+	padding: 12px 10px;
+	background-color: $bg-interface;
+}
+
+.send-message-form{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.chat-message__text{
+	width: 100%;
+	height: 22px;
+	padding-right: 10px;
+	margin-right: 10px;
+	background: none;
+	border: none;
+	resize: none;
+	outline: none;
+	font-size: 14px;
+	font-weight: 300;
+	color: $main-font-color;
+}
+
+//Chat list
+.chat-list__el{
+	display: flex;
+}
+
+.chat-list__user img{
+	width: 33px;
+	height: 33px;
+	margin-right: 10px;
+	border-radius: 50%;
+}
+
+.chat-list-message__el{
+	position: relative;
+	display: table;
+	margin-bottom: 4px;
+	padding: 9px 15px;
+	padding-right: 55px;
+	border-radius: 5px;
+	background-color: #182533;
+	&:first-child:after{
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: -8px;
+		border-left: 10px solid transparent;
+		border-right: 10px solid transparent;
+		border-bottom: 10px solid #182533;
+	}
+}
+
+.chat-list .chat-list__el{
+	&:nth-child(2n){
+		flex-direction: row-reverse;
+	}
+}
+
+.chat-list .chat-list__el{
+	&:nth-child(2n) .chat-list__user img{
+		margin-right: 0;
+		margin-left: 10px;
+	}
+}
+
+.chat-list .chat-list__el{
+	&:nth-child(2n) .chat-list-message__el:first-child:after{
+		left: 0;
+		right: -8px;
+	}
+}
+
+.chat-list-message__text{
+	font-weight: 300;
+}
+
+.chat-list-message__date{
+	position: absolute;
+	right: 9px;
+	bottom: 5px;
+	color: $second-font-color;
+	font-weight: 300;
+}
