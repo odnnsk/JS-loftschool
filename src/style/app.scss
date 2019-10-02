@@ -289,6 +289,37 @@ section{
 	color: $main-font-color;
 }
 
+//chat sidebar content
+.chat-sidebar__content{
+	padding: 20px 0;
+}
+
+.chat-users__el{
+	display: flex;
+	align-items: center;
+	margin-bottom: 15px;
+}
+
+.chat-users__img{
+	width: 46px;
+	height: 46px;
+	margin-right: 10px;
+}
+
+.chat-users__img img{
+	width: 100%;
+	border-radius: 50%;
+}
+
+.chat-users__name{
+	font-weight: 300;
+}
+
+.chat-users__msg{
+	font-weight: 300;
+	color: $second-font-color;
+}
+
 
 /*
 	CHAT CONTENT
