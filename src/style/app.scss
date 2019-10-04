@@ -358,6 +358,8 @@ section{
 	flex: 1;
 	padding: 22px 10px;
 	background-color: $bg-chat;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .chat-message{
@@ -447,3 +449,40 @@ section{
 	color: $second-font-color;
 	font-weight: 300;
 }
+
+
+/*Scrollbar*/
+.chat-list::-webkit-scrollbar{
+	width: 3px;
+	height: 3px;
+}
+.chat-list::-webkit-scrollbar-button{
+	width: 0px;
+	height: 0px;
+}
+.chat-list::-webkit-scrollbar-thumb{
+	background: #263540;
+	border: 0px none #0e1621;
+	border-radius: 50px;
+}
+.chat-list::-webkit-scrollbar-thumb:hover{
+	background: #17212b;
+}
+.chat-list::-webkit-scrollbar-thumb:active{
+	background: #17212b;
+}
+.chat-list::-webkit-scrollbar-track{
+	background: #0e1621;
+	border: 0px none #0e1621;
+	border-radius: 50px;
+}
+.chat-list::-webkit-scrollbar-track:hover{
+	background: #0e1621;
+}
+.chat-list::-webkit-scrollbar-track:active{
+	background: #333333;
+}
+.chat-list::-webkit-scrollbar-corner{
+	background: transparent;
+}
+/*Scrollbar*/

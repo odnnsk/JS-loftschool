@@ -1,5 +1,6 @@
 import './style/app.scss';
-
+import './img/default-image.png';
+import io from 'socket.io-client';
 
 
 
@@ -14,11 +15,19 @@ let numUsers = 2;//from backend
 
 // let currentUserId = '';
 
+const socket = io();
+
 let usersList = document.querySelector('.chat-users');
 let sendMessageForm = document.querySelector('.send-message-form');
 let messageInput = document.querySelector('.chat-message__text');
 let chatMessageList = document.querySelector('.chat-list');
 let chatNumUsers = document.querySelector('.chat-header__users');
+
+
+
+
+
+
 
 //Dev Data
 //login
@@ -39,10 +48,11 @@ const userData = {
     id: 0,
     name: 'Игорь Яицкий',
     nick: 'Nick',
-    image: 'assets/chat-user-1.jpg',
+    image: 'assets/default-image.png',
     lastMessage: 'Рад был пообщаться!',
     numUsers: 2
 };
+
 
 
 
@@ -103,7 +113,7 @@ function sendMessage(message){
     container.appendChild(messageHtml);
 
     // Scroll message container
-    // $messages[0].scrollTop = $messages[0].scrollHeight;
+    chatMessageList.scrollTop = chatMessageList.scrollHeight;
 }
 
 function createMessageEl(message){
@@ -172,6 +182,9 @@ function num2str(n) {
 
 
 
+
+
+
 function checkLogedInUser(){
 
 }
@@ -204,8 +217,19 @@ sendMessageForm.addEventListener('submit', e => {
    }
 });
 
+console.log(23);
+
+
+
+alert(111);
 
 
 /*
 * Socket Events
 * */
+socket.on('login', (data) => {
+    console.log(data);
+    
+    console.log('123!!');
+
+});

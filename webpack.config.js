@@ -14,19 +14,35 @@ let path = require('path');
 //     })
 // });
 
+
 module.exports = {
     entry: {
-        main: './src/index.js',
+        main: [
+            // 'webpack-hot-middleware/client?reload=true&timeout=1000',
+            './src/index.js',
+        ]
     },
     output: {
         filename: '[name].[hash].js',
-        path: path.resolve('dist')
+        path: path.resolve('dist'),
+        // publicPath: './src/index.js',
     },
     devServer: {
         // index: 'index.html',
+        host: 'localhost',
         contentBase: path.join(__dirname, "src"),
         port: 3000,
+        historyApiFallback: true,
+        hot: true,
+        // inline: true,
+        // proxy: {
+        //     '/api': {
+        //         target: 'http://localhost:8080',
+        //         pathRewrite: {'^/api' : ''}
+        //     }
+        // }
     },
+    mode: 'development',
     devtool: 'source-map',
     module: { rules },
     plugins: [
@@ -46,6 +62,13 @@ module.exports = {
             filename: 'index.html',
             // chunks: ['main']
         }),
-        new CleanWebpackPlugin(['dist'])
+        new CleanWebpackPlugin(['dist']),
+
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoEmitOnErrorsPlugin()
+
+        // // new webpack.optimize.OccurenceOrderPlugin(),
+        // new webpack.HotModuleReplacementPlugin(),
+        // // new webpack.NoErrorsPlugin(),
     ]
 };
