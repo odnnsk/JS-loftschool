@@ -24,7 +24,9 @@ module.exports = [
                 loader: "css-loader",
                 options: {
                     sourceMap: isDevelopment,
-                    minimize: !isDevelopment
+                    minimize: !isDevelopment,
+                    hmr: true,
+                    reloadAll: true,
                 }
             },
             {

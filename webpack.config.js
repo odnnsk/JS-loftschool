@@ -16,6 +16,23 @@ let path = require('path');
 
 
 module.exports = {
+    mode: 'development',
+    devServer: {
+        // index: 'index.html',
+        host: 'localhost',
+        contentBase: path.join(__dirname, "src"),
+        port: 3000,
+        // historyApiFallback: true,
+        // hot: true,
+        // watchContentBase: true,
+        // inline: true,
+        // proxy: {
+        //     '/api': {
+        //         target: 'http://localhost:8080',
+        //         pathRewrite: {'^/api' : ''}
+        //     }
+        // }
+    },
     entry: {
         main: [
             // 'webpack-hot-middleware/client?reload=true&timeout=1000',
@@ -25,24 +42,9 @@ module.exports = {
     output: {
         filename: '[name].[hash].js',
         path: path.resolve('dist'),
+        // publicPath: '/',
         // publicPath: './src/index.js',
     },
-    devServer: {
-        // index: 'index.html',
-        host: 'localhost',
-        contentBase: path.join(__dirname, "src"),
-        port: 3000,
-        historyApiFallback: true,
-        hot: true,
-        // inline: true,
-        // proxy: {
-        //     '/api': {
-        //         target: 'http://localhost:8080',
-        //         pathRewrite: {'^/api' : ''}
-        //     }
-        // }
-    },
-    mode: 'development',
     devtool: 'source-map',
     module: { rules },
     plugins: [
@@ -64,8 +66,11 @@ module.exports = {
         }),
         new CleanWebpackPlugin(['dist']),
 
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin()
+        // new webpack.HotModuleReplacementPlugin(),
+        // new webpack.NoEmitOnErrorsPlugin()
+
+
+
 
         // // new webpack.optimize.OccurenceOrderPlugin(),
         // new webpack.HotModuleReplacementPlugin(),
