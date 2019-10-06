@@ -1,41 +1,105 @@
 const path = require('path');
 const http = require('http');
+const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 
-// const webpack = require('webpack');
-// const webpackDevMiddleware = require('webpack-dev-middleware');
-// const webpackHotMiddleware = require('webpack-hot-middleware');
-// const webpackConfig = require('./webpack.config');
-//
-//
-//
-// const devServerEnabled = true;
-//
-// if (devServerEnabled) {
-//     //reload=true:Enable auto reloading when changing JS files or content
-//     //timeout=1000:Time from disconnecting from server to reconnecting
-//     webpackConfig.entry.main.unshift('webpack-hot-middleware/client?reload=true&timeout=1000');
-//
-//     //Add HMR plugin
-//     webpackConfig.plugins.push(new webpack.HotModuleReplacementPlugin());
-//
-//     const compiler = webpack(webpackConfig);
-//
-//     //Enable "webpack-dev-middleware"
-//     app.use(webpackDevMiddleware(compiler, {
-//         publicPath: webpackConfig.output.publicPath
-//     }));
-//
-//     //Enable "webpack-hot-middleware"
-//     app.use(webpackHotMiddleware(compiler));
-// }
+// const router = express.Router();
+// const fs = require('fs');
+// // const path = require('path');
+// // const db = require('../models');
+// const formidable = require('formidable');
 
 
-// You probably have other paths here
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+
+//CORS
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+
+// Static
 // app.use(express.static(path.join(__dirname, 'dist')));
+
+
+// Routes
+app.use('/', require('./routes/index'));
+
+// app.post('/', async (req, res, next) => {
+//     try{
+//         const image = await writePhoto(req);
+//
+//         //TODO: res mime type for resize, size
+//         res.status(200).json({
+//             status: true,
+//             image,
+//         });
+//     }
+//     catch(err){
+//         console.error(err);
+//     }
+// });
+
+// const writePhoto = req => new Promise(async (resolve, reject) => {
+//     try {
+//         // parse a form with file upload. multipart/form-data
+//         const form = new formidable.IncomingForm();
+//         const uploadDir = path.join(process.cwd(), '/dist', 'assets');
+//
+//         if (!fs.existsSync(uploadDir)) {
+//             fs.mkdirSync(uploadDir, { recursive: true })
+//         }
+//
+//         form.uploadDir = uploadDir;
+//
+//         form.parse(req, (err, fields, files) => {
+//             if(err) reject(err);
+//
+//             let img = fields.photo.split(';base64,').pop();
+//             let imgName = fields.photoName;
+//
+//             const fileName = path.join(uploadDir, imgName);
+//
+//             fs.writeFile(fileName, img, {encoding: 'base64'}, function(err) {
+//                 if(err) reject(err);
+//
+//                 console.log('File created');
+//
+//                 //Save userData in db
+//                 // updateUserData(fields.userId, {image: 'assets/' + imgName});
+//
+//                 return resolve('assets/' + imgName);
+//             });
+//         });
+//     }
+//     catch(err) {
+//         reject(err);
+//     }
+// });
+
+
+
+// catch 404 and forward to error handler
+app.use((req, res, next) => {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err)
+});
+
+// error handler
+app.use((err, req, res, next) => {
+    // render the error page
+    res.status(err.status || 500);
+    // res.render('error', { message: err.message, error: err })
+    res.send(`${err.status} ${err.message}`)
+});
 
 
 const PORT = process.env.PORT || 3200;
@@ -43,10 +107,12 @@ const PORT = process.env.PORT || 3200;
 server.listen(PORT);
 
 
+
 let numUsers = 0;
 let id = 0;//from db
 let defaultImage = 'assets/default-image.png';
 // const users = {};
+// const messages = {};
 let currentUser;
 
 //For dev
@@ -69,12 +135,13 @@ const users = {
     }
 };
 
-
-//dev
-id = Object.keys(users).length;
-
-
 const messages = [
+    {
+        id: 0,
+        userId: 0,
+        text: 'Hello!!!',
+        date: '17:56'
+    },
     {
         id: 0,
         userId: 0,
@@ -88,6 +155,9 @@ const messages = [
         date: '17:30'
     }
 ];
+
+//dev
+id = Object.keys(users).length;
 
 
 const getLastUserMessage = id => {
@@ -124,6 +194,12 @@ const getUserByNick = nick => {
     }
 
     return false;
+};
+
+//Update user data in db
+const updateUserData = (id, data) => {
+    console.log(id);
+    console.log(data);
 };
 
 
@@ -198,6 +274,16 @@ io.on('connection', (socket) => {
             message: data
         });
     });
+
+    //Update user image
+    socket.on('updateUserImage', data => {
+        //Save data
+        users[socket.userId].image = data.image;
+
+        socket.emit('updateUserImage', data);
+        socket.broadcast.emit('updateUserImage', data);
+    });
+
 
     //Disconnect
     socket.on('disconnect', () => {

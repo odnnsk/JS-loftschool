@@ -1,0 +1,33 @@
+<div class="photo">
+    <div class="photo__inner">
+
+        <div class="photo__wrap">
+
+<!--            <form action="" class="auth-form">-->
+<!--                <input type="text" class="auth-form__input" name="name" placeholder="Введите имя" autocomplete="off">-->
+<!--                <input type="text" class="auth-form__input" name="nickname" placeholder="Введите свой ник" autocomplete="off">-->
+<!--                <button type="submit" class="btn btn--auth">Войти</button>-->
+<!--            </form>-->
+
+            <div id="drop-area">
+                <p class="drop-area__desc">Перетащите сюда фото</p>
+                <div id="gallery"></div>
+            </div>
+
+            <form class="my-form" enctype="multipart/form-data">
+<!--                <p>Перетащите сюда фото</p>-->
+                <input type="file" id="fileElem" name="photo" accept="image/jpeg">
+                <!--                    <label class="button" for="fileElem">Выбрать изображения</label>-->
+            </form>
+
+            <div class="photo-controls">
+                <p class="photo-controls__desc">Область дляпрофильной фотографии</p>
+                <div class="btn btn--add-photo">Сохранить</div>
+                <div class="btn btn--close-photo">Отмена</div>
+            </div>
+
+
+        </div>
+
+    </div>
+</div>

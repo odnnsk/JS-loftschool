@@ -1,14 +1,17 @@
 import './style/app.scss';
 import './img/default-image.png';
+import './img/chat-list-user-1.jpg';
+import './img/chat-user-2.jpg';
 import io from 'socket.io-client';
 
-
-let connected = false;
 
 const socket = io.connect('http://localhost:3200/');
 
 let userData = {};
 let messageData = {};
+
+//Dev
+userData.id = 1;
 
 let usersList = document.querySelector('.chat-users');
 let sendMessageForm = document.querySelector('.send-message-form');
@@ -41,6 +44,105 @@ authBtn.addEventListener('click', e => {
 });
 
 
+/*
+* Photo
+* */
+let addPhotoModal = document.querySelector('.photo');
+let photoModalBtn = document.querySelector('.chat-menu');
+let dropArea = document.getElementById("drop-area");
+let closePhotoBtn = document.querySelector('.btn--close-photo');
+let addPhotoBtn = document.querySelector('.btn--add-photo');
+const theImage = document.querySelector('#gallery');
+const photoInput = document.querySelector('#fileElem');
+const fileReader = new FileReader();
+
+photoModalBtn.addEventListener('click', () => {
+    addPhotoModal.style.display = 'block';
+});
+
+closePhotoBtn.addEventListener('click', () => {
+    addPhotoModal.style.display = 'none';
+});
+
+addPhotoBtn.addEventListener('click', () => {
+    uploadFile(fileReader.result);
+});
+
+// Prevent default drag behaviors
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false)
+    document.body.addEventListener(eventName, preventDefaults, false)
+});
+
+// Highlight drop area when item is dragged over it
+['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, highlight, false)
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, unhighlight, false)
+});
+
+// Handle dropped files
+dropArea.addEventListener('drop', handleDrop, false);
+
+function preventDefaults (e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight() {
+    dropArea.classList.add('highlight');
+}
+
+function unhighlight() {
+    dropArea.classList.remove('highlight');
+}
+
+function handleDrop(e) {
+    const [file] = e.dataTransfer.files;
+
+    if (file) {
+        if (file.size > 300 * 1024){
+            alert('Файл не должен превышать 300кб!');
+        }else if(file.type !== 'image/jpeg'){
+            alert('Только jpeg!');
+        } else{
+            fileReader.fileName = file.name;
+            fileReader.readAsDataURL(file);
+        }
+    }
+}
+
+fileReader.addEventListener('load', () => {
+    let img = document.createElement('img');
+    img.src = fileReader.result;
+    document.getElementById('gallery').appendChild(img);
+});
+
+async function uploadFile(file) {
+    let url = 'http://localhost:3200/';
+    let formData = new FormData();
+    formData.append('userId', userData.id);
+    formData.append('photoName', fileReader.fileName);
+    formData.append('photo', file);
+
+    let response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (response.ok) {
+        let data = await response.json();
+        
+        socket.emit('updateUserImage', {id: userData.id, image: data.image});
+    } else {
+        alert("Ошибка HTTP: " + response.status);
+    }
+}
+
+
+//For auth
 if (localStorage.id) {
     //Send id. Get data
     //Hide auth
@@ -64,7 +166,12 @@ function addUserToList(data) {
     div.classList.add('chat-users__el');
     div.dataset.id = data.id;
 
-    div.innerHTML = `<div class="chat-users__img"><img src="${data.image}" alt=""></div><div class="chat-users__info"><div class="chat-users__name">${data.name}</div><div class="chat-users__msg">${data.lastMessage}</div></div></div>`;
+    div.innerHTML = `<div class="chat-users__img" style="background-image: url(${data.image});">
+<!--    <img src="${data.image}" alt="">-->
+    </div>
+    <div class="chat-users__info">
+    <div class="chat-users__name">${data.name}</div>
+    <div class="chat-users__msg">${data.lastMessage}</div></div></div>`;
 
     usersList.appendChild(div);
 }
@@ -78,7 +185,7 @@ function sendMessage(user, message) {
     let messageHtml;
     let lastMessage = chatMessageList.lastElementChild;
 
-    if (user.id.toString() === lastMessage.dataset.id) {
+    if (lastMessage && user.id.toString() === lastMessage.dataset.id) {
         container = lastMessage.querySelector('.chat-list-message');
         messageHtml = createMessage(user, message);
     } else {
@@ -100,12 +207,12 @@ function createMessageEl(user, message) {
     div.classList.add('chat-list__el');
     div.dataset.id = user.id;
 
-    div.innerHTML = '<div class="chat-list__user">' +
-        '<img src="' + user.image + '" alt="">' +
-        '</div>' +
-        '<ul class="chat-list-message">' +
-        innerMessage.outerHTML +
-        '</ul>';
+    div.innerHTML = `<div class="chat-list__user" style="background-image: url(${user.image});">
+<!--    <img src="${user.image}" alt="">-->
+    </div>
+    <ul class="chat-list-message">
+        ${innerMessage.outerHTML}
+    </ul>`;
 
     return div;
 }
@@ -178,40 +285,53 @@ function updateLastUserMessage(id, message) {
 }
 
 function renderChat(data) {
-    let html = '';
-    let { users, messages } = data;
+    let html = [];
+    let fragment = document.createDocumentFragment();
+    let tempFragment = document.createDocumentFragment();
+    let {users, messages} = data;
 
-    console.log(users);
-    console.log(messages);
+    messages.forEach((el, index) => {
+        tempFragment.appendChild(createMessage(users[el.userId], el));
 
-    messages.forEach(el => {
-        // html += createMessageEl(users[el.userId], el);
-        chatMessageList.appendChild(createMessageEl(users[el.userId], el))
+        if (!messages[index + 1] || el.userId !== messages[index + 1].userId) {
+            let div = document.createElement('div');
+            let divUser = document.createElement('div');
+            let ul = document.createElement('ul');
+
+            div.classList.add('chat-list__el');
+            div.dataset.id = el.userId;
+            divUser.classList.add('chat-list__user');
+            ul.classList.add('chat-list-message');
+
+            // divUser.innerHTML = '<img src="' + users[el.userId].image + '" alt="">';
+            divUser.style.backgroundImage = `url(${users[el.userId].image})`;
+
+            ul.appendChild(tempFragment);
+            div.appendChild(divUser);
+            div.appendChild(ul);
+
+            fragment.appendChild(div);
+            tempFragment = document.createDocumentFragment();
+        }
     });
 
-    // console.log(html);
-    // chatMessageList.innerHTML = html;
+    chatMessageList.appendChild(fragment);
+
+    // Scroll message container
+    chatMessageList.scrollTop = chatMessageList.scrollHeight;
 }
 
+function updateUserImage(data){
+    let chatListImg = document.querySelector('.chat-users__el[data-id="' + data.id + '"] .chat-users__img');
+    let chatImg = document.querySelectorAll('.chat-list__el[data-id="' + data.id + '"] .chat-list__user');
 
-function checkLogedInUser() {
+    chatListImg.style.backgroundImage = `url(${data.image})`;
 
+    chatImg.forEach(el => {
+       el.style.backgroundImage = `url(${data.image})`;
+    });
 }
 
-
-function updateUsersList() {
-
-}
-
-
-function checkLastUserMessage() {
-
-}
-
-
-function addMessageEl() {
-
-}
 
 
 /*
@@ -265,9 +385,15 @@ socket.on('updateLastUserMessage', data => {
     updateLastUserMessage(data.id, data.message);
 });
 
-
 socket.on('renderChat', data => {
     renderChat(data);
 });
+
+socket.on('updateUserImage', data => {
+    updateUserImage(data);
+});
+
+
+
 
 
