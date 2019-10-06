@@ -29,7 +29,7 @@ exports.add = req => new Promise(async (resolve, reject) => {
 
                 console.log('File created');
 
-                //Save userData in db
+                //TODO: Save userData in db
                 // updateUserData(fields.userId, {image: 'assets/' + imgName});
 
                 return resolve('assets/' + imgName);

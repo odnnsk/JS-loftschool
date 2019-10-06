@@ -6,16 +6,9 @@ const app = express();
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 
-// const router = express.Router();
-// const fs = require('fs');
-// // const path = require('path');
-// // const db = require('../models');
-// const formidable = require('formidable');
-
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
 
 //CORS
 app.use(function(req, res, next) {
@@ -26,64 +19,11 @@ app.use(function(req, res, next) {
 
 
 // Static
-// app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 
 // Routes
 app.use('/', require('./routes/index'));
-
-// app.post('/', async (req, res, next) => {
-//     try{
-//         const image = await writePhoto(req);
-//
-//         //TODO: res mime type for resize, size
-//         res.status(200).json({
-//             status: true,
-//             image,
-//         });
-//     }
-//     catch(err){
-//         console.error(err);
-//     }
-// });
-
-// const writePhoto = req => new Promise(async (resolve, reject) => {
-//     try {
-//         // parse a form with file upload. multipart/form-data
-//         const form = new formidable.IncomingForm();
-//         const uploadDir = path.join(process.cwd(), '/dist', 'assets');
-//
-//         if (!fs.existsSync(uploadDir)) {
-//             fs.mkdirSync(uploadDir, { recursive: true })
-//         }
-//
-//         form.uploadDir = uploadDir;
-//
-//         form.parse(req, (err, fields, files) => {
-//             if(err) reject(err);
-//
-//             let img = fields.photo.split(';base64,').pop();
-//             let imgName = fields.photoName;
-//
-//             const fileName = path.join(uploadDir, imgName);
-//
-//             fs.writeFile(fileName, img, {encoding: 'base64'}, function(err) {
-//                 if(err) reject(err);
-//
-//                 console.log('File created');
-//
-//                 //Save userData in db
-//                 // updateUserData(fields.userId, {image: 'assets/' + imgName});
-//
-//                 return resolve('assets/' + imgName);
-//             });
-//         });
-//     }
-//     catch(err) {
-//         reject(err);
-//     }
-// });
-
 
 
 // catch 404 and forward to error handler
@@ -102,9 +42,9 @@ app.use((err, req, res, next) => {
 });
 
 
-const PORT = process.env.PORT || 3200;
-
-server.listen(PORT);
+server.listen(process.env.PORT || 3200, function () {
+    console.log('Сервер запущен на порте: ' + server.address().port);
+});
 
 
 
@@ -122,7 +62,7 @@ const users = {
         name: 'Name',
         nick: 'Nick',
         image: 'assets/chat-list-user-1.jpg',
-        status: true,
+        status: false,
         lastMessageId: 0
     },
     1: {
@@ -130,7 +70,7 @@ const users = {
         name: 'Name2',
         nick: 'Nick2',
         image: 'assets/chat-user-2.jpg',
-        status: true,
+        status: false,
         lastMessageId: 1
     }
 };

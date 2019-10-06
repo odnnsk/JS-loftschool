@@ -59,7 +59,7 @@ module.exports = {
             chunkFilename: "[id].css"
         }),
         new HtmlPlugin({
-            title: 'YA Maps API',
+            title: 'Awesome Chat',
             template: './src/views/index.hbs',
             filename: 'index.html',
             // chunks: ['main']

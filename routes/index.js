@@ -5,7 +5,7 @@ const photoCtrl = require('../controllers/photo.js');
 
 router.post('/', async (req, res, next) => {
     try{
-        const image = await photoCtrl(req);
+        const image = await photoCtrl.add(req);
 
         //TODO: res mime type for resize, size
         res.status(200).json({

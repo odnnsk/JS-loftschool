@@ -237,12 +237,13 @@ input.error{
 .chat {
 	display: flex;
 	height: 100vh;
+	min-height: 500px;
 }
 
 //Chat sidebar
 .chat-sidebar {
 	width: 260px;
-	height: 100vh;
+	height: 100%;
 	padding: 10px 15px;
 	background-color: $bg-interface;
 	border-right: 1px solid $bg-chat;
@@ -316,9 +317,10 @@ input.error{
 	width: 46px;
 	height: 46px;
 	margin-right: 10px;
-	background-size: contain;
+	background-size: cover;
 	background-repeat: no-repeat;
 	border-radius: 50%;
+	background-position: center;
 }
 
 .chat-users__img img {
@@ -412,8 +414,9 @@ input.error{
 	height: 33px;
 	margin-right: 10px;
 	border-radius: 50%;
-	background-size: contain;
+	background-size: cover;
 	background-repeat: no-repeat;
+	background-position: center;
 }
 
 .chat-list__user img {
@@ -676,5 +679,6 @@ input.error{
 	background: none;
 	&:hover{
 		background: none;
+		color: #759abb;
 	}
 }

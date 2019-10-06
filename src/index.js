@@ -10,9 +10,6 @@ const socket = io.connect('http://localhost:3200/');
 let userData = {};
 let messageData = {};
 
-//Dev
-userData.id = 1;
-
 let usersList = document.querySelector('.chat-users');
 let sendMessageForm = document.querySelector('.send-message-form');
 let messageInput = document.querySelector('.chat-message__text');
@@ -42,6 +39,18 @@ authBtn.addEventListener('click', e => {
         socket.emit('add user', {name, nick});
     }
 });
+
+//For auth
+if (localStorage.id) {
+    //Send id. Get data
+    //Hide auth
+    //Show chat
+} else {
+    //Auth
+    //Get data
+    //Hide auth
+    //Show chat
+}
 
 
 /*
@@ -134,26 +143,17 @@ async function uploadFile(file) {
 
     if (response.ok) {
         let data = await response.json();
-        
+
+        //Update userData
+        userData.image = data.image;
+
+        addPhotoModal.style.display = 'none';
+
         socket.emit('updateUserImage', {id: userData.id, image: data.image});
     } else {
         alert("Ошибка HTTP: " + response.status);
     }
 }
-
-
-//For auth
-if (localStorage.id) {
-    //Send id. Get data
-    //Hide auth
-    //Show chat
-} else {
-    //Auth
-    //Get data
-    //Hide auth
-    //Show chat
-}
-
 
 function addUserToList(data) {
     //if user exist
@@ -349,7 +349,6 @@ sendMessageForm.addEventListener('submit', e => {
         messageInput.value = '';
     }
 });
-
 
 /*
 * Socket Events

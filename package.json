@@ -12,7 +12,8 @@
     "test": "karma start",
     "cover": "istanbul cover _mocha -- test/*.js",
     "prepare": "npm run travis",
-    "server": "nodemon ./app.js"
+    "devserver": "nodemon ./app.js",
+    "server": "node ./app.js"
   },
   "author": "",
   "license": "MIT",
